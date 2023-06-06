@@ -1,20 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { BsFillArrowRightCircleFill } from "react-icons/bs";
+import { BsFillArrowDownCircleFill } from "react-icons/bs";
 import { FaRegCopy } from "react-icons/fa";
 import { sqlTransform } from "./components/SqlTransform";
+import Prism from "prismjs";
+import "prismjs/components/prism-sql";
+import "prismjs/themes/prism-tomorrow.css";
 
 function App() {
   const [valueInput, setValueInput] = useState("");
   const [valueTitle, setValueTitle] = useState("");
   const [textSql, setTextSql] = useState("");
   const [sql, setSql] = useState(true);
-  const [lengthArray, setLengthArray] = useState();
+  const [numeroColumnas, setNumeroColumnas] = useState();
+
+  const ref = useRef(null);
 
   useEffect(() => {
-    const { text } = sqlTransform(valueInput, valueTitle);
+    if (ref.current) {
+      Prism.highlightElement(ref.current);
+    }
+  }, [textSql]);
+
+  useEffect(() => {
+    const { text, numeroColumnasFinal } = sqlTransform(valueInput, valueTitle);
     setTextSql(text);
-    setLengthArray(length);
+    setNumeroColumnas(numeroColumnasFinal);
   }, [sql]);
 
   const handleSubmit = (e) => {
@@ -43,20 +54,20 @@ function App() {
             autoComplete="off"
           ></textarea>
         </div>
-        <BsFillArrowRightCircleFill
+        <BsFillArrowDownCircleFill
           onClick={handleSubmit}
           size={35}
           className="arrow"
         />
         <div className="second-container">
-          <FaRegCopy
-            size={"1.5rem"}
-            className="copy-clip"
-            onClick={handleCopy}
-          />
-          {textSql}
+          <div className="columnas-number">Columnas: {numeroColumnas}</div>
+          <FaRegCopy size={"2rem"} className="copy-clip" onClick={handleCopy} />
+          <pre>
+            <code ref={ref} className="language-sql">
+              {textSql}
+            </code>
+          </pre>
         </div>
-        {length && <h2>length</h2>}
       </div>
     </>
   );

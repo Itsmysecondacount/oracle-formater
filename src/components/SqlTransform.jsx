@@ -1,51 +1,54 @@
 function func1(a, title) {
   let arrayString = a.split(/\s+/);
-  console.log(arrayString.length);
-  let newString = `with t_fechas as
+  let numeroColumnas = arrayString.length;
+  let newString = `WITH t_fechas AS
         (select to_date(:P_FECHA_INICIO, 'dd/mm/yyyy hh24:mi:ss') + interval '5' hour P_FECHA_INICIO,
         to_date(:P_FECHA_FIN, 'dd/mm/yyyy hh24:mi:ss') + interval '5' hour P_FECHA_FIN
         from dual)
-        select \n
-        `;
+SELECT
+\n`;
   for (let i = 0; i < arrayString.length; i += 30) {
     for (let j = i; j < Math.min(i + 30, arrayString.length); j++) {
       if (arrayString.length - 1 === j) {
         newString +=
-          "'" +
+          "\t'" +
           arrayString[j] +
           "' " +
           "\n" +
-          `BLOQUE_${Math.floor(i / 30) + 1} \n \n \n`;
+          `\tBLOQUE_${Math.floor(i / 30) + 1}\n\n`;
       } else {
         if (j % 30 === 0 && j != 0) {
           newString +=
-            "'" +
+            "\t'" +
             arrayString[j] +
             "'" +
             "\n" +
-            `BLOQUE_${Math.floor(i / 30)}, \n \n \n`;
+            `\tBLOQUE_${Math.floor(i / 30)}, \n \n \n`;
         } else {
-          newString += "'" + arrayString[j] + "'" + " || :P_SEPARADOR || \n";
+          newString += "\t'" + arrayString[j] + "'" + " || :P_SEPARADOR || \n";
         }
       }
     }
   }
 
-  newString += `from dual \n
-  UNION ALL  
-  select `;
+  newString += `FROM dual
+UNION ALL \n  
+SELECT \n\n`;
 
   for (let i = 0; i < arrayString.length; i += 30) {
     for (let j = i; j < Math.min(i + 30, arrayString.length); j++) {
       if (arrayString.length - 1 === j) {
         newString +=
-          arrayString[j] + "\n" + `BLOQUE_${Math.floor(i / 30) + 1} \n \n \n`;
+          "\t" +
+          arrayString[j] +
+          "\n" +
+          `\tBLOQUE_${Math.floor(i / 30) + 1} \n \n \n`;
       } else {
         if (j % 30 === 0 && j != 0) {
           newString +=
-            arrayString[j] + "\n" + `BLOQUE_${Math.floor(i / 30)}, \n \n \n`;
+            arrayString[j] + "\n\t" + `BLOQUE_${Math.floor(i / 30)}, \n \n \n`;
         } else {
-          newString += arrayString[j] + " || :P_SEPARADOR || \n";
+          newString += "\t" + arrayString[j] + " || :P_SEPARADOR || \n";
         }
       }
     }
@@ -61,22 +64,26 @@ function func1(a, title) {
 
   const minTitle = miniTitle(title);
 
-  let finalString = `from ${title} ${minTitle} 
-  where 1 = 1
-  and ((${minTitle}.creation_date between
-    nvl((select P_FECHA_INICIO from t_fechas), ${minTitle}.creation_date) and
-    nvl((select P_FECHA_FIN from t_fechas), ${minTitle}.creation_date)) or
-    (${minTitle}.last_update_date between
-    nvl((select P_FECHA_INICIO from t_fechas), ${minTitle}.last_update_date) and
+  let finalString = `FROM ${title} ${minTitle} 
+  WHERE 1 = 1
+  AND ((${minTitle}.creation_date BETWEEN
+    nvl((select P_FECHA_INICIO from t_fechas), ${minTitle}.creation_date) AND
+    nvl((select P_FECHA_FIN from t_fechas), ${minTitle}.creation_date)) OR
+    (${minTitle}.last_update_date BETWEEN
+    nvl((select P_FECHA_INICIO from t_fechas), ${minTitle}.last_update_date) AND
     nvl((select P_FECHA_FIN from t_fechas), ${minTitle}.last_update_date)))`;
-  return newString + finalString;
+  const textoVuelta = newString + finalString;
+  return { textoVuelta, numeroColumnas };
 }
 
 export const sqlTransform = (text = "hola", title) => {
+  let numeroColumnasFinal = 0;
   if (text === "") {
     text = "SQL Transform";
   } else {
-    text = func1(text, title);
+    const { textoVuelta, numeroColumnas } = func1(text, title);
+    text = textoVuelta;
+    numeroColumnasFinal = numeroColumnas;
   }
-  return { text };
+  return { text, numeroColumnasFinal };
 };

@@ -45,10 +45,12 @@ function App() {
         <div className="first-container">
           <input
             type="text"
+            placeholder="Título de la tabla"
             value={valueTitle}
             onChange={(e) => setValueTitle(e.target.value)}
           />
           <textarea
+            placeholder="Columnas"
             value={valueInput}
             onChange={(e) => setValueInput(e.target.value)}
             autoComplete="off"

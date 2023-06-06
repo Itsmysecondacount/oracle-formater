@@ -46,7 +46,10 @@ SELECT \n\n`;
       } else {
         if (j % 30 === 0 && j != 0) {
           newString +=
-            arrayString[j] + "\n\t" + `BLOQUE_${Math.floor(i / 30)}, \n \n \n`;
+            "\t" +
+            arrayString[j] +
+            "\n\t" +
+            `BLOQUE_${Math.floor(i / 30)}, \n \n \n`;
         } else {
           newString += "\t" + arrayString[j] + " || :P_SEPARADOR || \n";
         }

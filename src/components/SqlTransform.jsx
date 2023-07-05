@@ -13,7 +13,7 @@ SELECT
         newString +=
           "\t'" +
           arrayString[j] +
-          "' " +
+          "' " + "|| '\"'" +
           "\n" +
           `\tBLOQUE_${Math.floor(i / 30) + 1}\n\n`;
       } else {
@@ -22,10 +22,14 @@ SELECT
             "\t'" +
             arrayString[j] +
             "'" +
-            "\n" +
+            " || :P_SEPARADOR  \n" + 
             `\tBLOQUE_${Math.floor(i / 30)}, \n \n \n`;
         } else {
-          newString += "\t'" + arrayString[j] + "'" + " || :P_SEPARADOR || \n";
+          if ( j === 0 && i === 0) {
+            newString += "\t'\"'"+ ' || ' +"\t'" + arrayString[j] + "'" + " || :P_SEPARADOR || \n";
+          } else {
+            newString += "\t'" + arrayString[j] + "'" + " || :P_SEPARADOR || \n";
+          }
         }
       }
     }
@@ -40,18 +44,22 @@ SELECT \n\n`;
       if (arrayString.length - 1 === j) {
         newString +=
           "\t" +
-          arrayString[j] +
+          arrayString[j] + " || '\"' " + 
           "\n" +
           `\tBLOQUE_${Math.floor(i / 30) + 1} \n \n \n`;
       } else {
         if (j % 30 === 0 && j != 0) {
           newString +=
             "\t" +
-            arrayString[j] +
+            arrayString[j] + " || :P_SEPARADOR" +
             "\n\t" +
             `BLOQUE_${Math.floor(i / 30)}, \n \n \n`;
         } else {
-          newString += "\t" + arrayString[j] + " || :P_SEPARADOR || \n";
+          if ( j === 0 && i === 0) {
+            newString += "\t'\"'"+ ' || ' +"\t" + arrayString[j] + " || :P_SEPARADOR || \n";
+          } else {
+            newString += "\t" + arrayString[j] + " || :P_SEPARADOR || \n";
+          }
         }
       }
     }
@@ -70,11 +78,11 @@ SELECT \n\n`;
   let finalString = `FROM ${title} ${minTitle} 
   WHERE 1 = 1
   AND ((${minTitle}.creation_date BETWEEN
-    nvl((select P_FECHA_INICIO from t_fechas), ${minTitle}.creation_date) AND
-    nvl((select P_FECHA_FIN from t_fechas), ${minTitle}.creation_date)) OR
+    nvl((select P_FECHA_INICIO from t_fechas), TO_DATE('2000-01-01','YYYY-MM-DD')) AND
+    nvl((select P_FECHA_FIN from t_fechas), TO_DATE('3000-12-31','YYYY-MM-DD'))) OR
     (${minTitle}.last_update_date BETWEEN
-    nvl((select P_FECHA_INICIO from t_fechas), ${minTitle}.last_update_date) AND
-    nvl((select P_FECHA_FIN from t_fechas), ${minTitle}.last_update_date)))`;
+    nvl((select P_FECHA_INICIO from t_fechas), TO_DATE('2000-01-01','YYYY-MM-DD')) AND
+    nvl((select P_FECHA_FIN from t_fechas), TO_DATE('3000-12-31','YYYY-MM-DD'))))`;
   const textoVuelta = newString + finalString;
   return { textoVuelta, numeroColumnas };
 }
